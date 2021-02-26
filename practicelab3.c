@@ -1,98 +1,94 @@
 #include  <pthread.h>
 #include  <stdio.h>
 #include  <stdlib.h>
-#define  SIZE                        13
+#include <limits.h>
+
 #define  NUMBER_OF_THREADS          3
 
-void *sorter(void *params);      /*  thread  that  performs  basic  sorting  algorithm*/
-void *merger(void *params);      /*  thread  that  performs  merging  of  results  */
-int  list[SIZE] = {7,12,19,17,23,3,18,4,2,6,15,1,8};
-int  result[SIZE];
 
-typedef struct
-{
+void *averagelist(void *params);
+void *minimumval(void *params);
+void *maximumval(void *params);
+int  average;
+int min = INT_MAX;
+int max = INT_MIN;
 
-}
+// int  result[SIZE];
+
+typedef  struct
+{   int  from_index;
+    int to_index;
+} parameters;
 
 typedef  struct
 {
       int* listofnums;
+      int size;
 
-} parameters;
+} listofint;
 
 int  main (int argc , const  char * argv[]){
 
-    parameters* data = malloc(sizeof(parameters));
+    listofint* intdata = malloc(sizeof(listofint));
     
-    data->listofnums = (int *)malloc((argc-1)*sizeof(int));
+    intdata->listofnums = (int *)malloc((argc-1)*sizeof(int));
+    intdata->size = argc-1;
 
     for (int i = 1; i < argc; i++){
-        data->listofnums[i] = strtol(argv[i], NULL, 10);
-	printf("%d ", data->listofnums[i]);
+        intdata->listofnums[i-1] = strtol(argv[i], NULL, 10);
     }
 
     int i;
     pthread_t workers[NUMBER_OF_THREADS];
-    /*  establish  the  first  sorting  thread  */
-    parameters *data = (parameters  *)  malloc (sizeof(parameters));
-    data ->from_index = 0;
-    data ->to_index = (SIZE /2) - 1;
-    pthread_create (& workers[0], 0, sorter , data);
-/*  establish  the  second  sorting  thread  */
-    data = (parameters  *)  malloc (sizeof(parameters));
-    data ->from_index = (SIZE /2);
-    data ->to_index = SIZE - 1;
-    pthread_create (& workers[1], 0, sorter , data);
-/* now  wait  for  the 2 sorting  threads  to  finish  */
-    for (i = 0; i < NUMBER_OF_THREADS  - 1; i++)
-        pthread_join(workers[i], NULL);/*  establish  the  merge  thread  */
-    data = (parameters  *)  malloc(sizeof(parameters));
-    data ->from_index = 0;
-    data ->to_index = (SIZE /2);
-    pthread_create (& workers[2], 0, merger , data);
-    /* wait  for  the  merge  thread  to  finish  */
+
+    pthread_create (& workers[0], 0, averagelist , intdata);
+
+    pthread_create (& workers[1], 0, minimumval , intdata);
+
+    pthread_create (& workers[2], 0, maximumval , intdata);
+
+    pthread_join(workers[0], NULL);
+    pthread_join(workers[1], NULL);
     pthread_join(workers[2], NULL);
-    /*  output  the  sorted  array */
-    for (i = 0; i < SIZE; i++)
-        printf ("%d   ",result[i]);
-        printf ("\n");
-        return  0;
-        }
+
+    free(intdata->listofnums);
+    free(intdata);
+    
+}
 
 /*** Sorting  thread.** This  thread  can  essentially  use any  algorithm  for  sorting*/
-void *sorter(void *params)
+void *averagelist(void *params)
 {   
-}
-/** Merge  thread** Uses  simple  merge  sort  for  merging  two  sublists*/
-void *merger(void *params){
-    parameters* p = (parameters  *) params;
-    int i,j;
-    i = p->from_index;
-    j = p->to_index;
-    int  position = 0;         /*  position  being  inserted  into  result  list */
-    while (i < p->to_index  && j < SIZE) {
-        if (list[i]  <= list[j]) {
-            result[position ++] = list[i];
-            i++;
-            }
-        else {
-            result[position ++] = list[j];
-            j++;
-            }
-        }/* copy  the  remainder  */
-        if (i < p->to_index) {
-            while (i < p->to_index) {
-                result[position] = list[i];
-                position ++;
-                i++;
-            }
-        }
-        else {
-            while (j < SIZE) {
-                result[position] = list[j];
-                position ++;
-                j++;
-            }
-        }
-        pthread_exit (0);
+    listofint* intdata = (listofint*)params;
+    int sum = 0;
+    for (int i = 0; i < intdata->size; i++){
+        sum += intdata->listofnums[i];
     }
+    average = sum / intdata->size;
+    printf("The average value is %d \n", average);
+
+
+}
+
+void *minimumval(void *params)
+{   
+    listofint* intdata = (listofint*)params;
+    // printf("%d", intdata->size);
+    for (int i = 0; i < intdata->size; i++){
+        if (intdata->listofnums[i] < min){
+            min = intdata->listofnums[i];
+        }
+    }
+    printf("The minimum value is %d \n", min);
+}
+
+void *maximumval(void *params)
+{   
+    listofint* intdata = (listofint*)params;
+    for (int i = 0; i < intdata->size; i++){
+        if (intdata->listofnums[i] > max){
+            max = intdata->listofnums[i];
+        }
+    }
+    printf("The maximum value is %d \n", max);
+}
