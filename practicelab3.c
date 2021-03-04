@@ -1,20 +1,36 @@
 #include  <pthread.h>
 #include  <stdio.h>
 #include  <stdlib.h>
-#define  SIZE                        10
+#define  SIZE                        13
 #define  NUMBER_OF_THREADS          3
 
 void *sorter(void *params);      /*  thread  that  performs  basic  sorting  algorithm*/
 void *merger(void *params);      /*  thread  that  performs  merging  of  results  */
-int  list[SIZE] = {7,12,19,3,18,4,2,6,15,8};
+int  list[SIZE] = {7,12,19,17,23,3,18,4,2,6,15,1,8};
 int  result[SIZE];
+
+typedef struct
+{
+
+}
+
 typedef  struct
 {
-    int  from_index;
-    int to_index;
+      int* listofnums;
+
 } parameters;
 
 int  main (int argc , const  char * argv[]){
+
+    parameters* data = malloc(sizeof(parameters));
+    
+    data->listofnums = (int *)malloc((argc-1)*sizeof(int));
+
+    for (int i = 1; i < argc; i++){
+        data->listofnums[i] = strtol(argv[i], NULL, 10);
+	printf("%d ", data->listofnums[i]);
+    }
+
     int i;
     pthread_t workers[NUMBER_OF_THREADS];
     /*  establish  the  first  sorting  thread  */
@@ -42,29 +58,10 @@ int  main (int argc , const  char * argv[]){
         printf ("\n");
         return  0;
         }
-        /*** Sorting  thread.** This  thread  can  essentially  use any  algorithm  for  sorting*/
+
+/*** Sorting  thread.** This  thread  can  essentially  use any  algorithm  for  sorting*/
 void *sorter(void *params)
 {   
-    int i;
-    parameters* p = (parameters  *) params;
-    int  begin = p->from_index;
-    int end = p->to_index;
-    int  swapped = 1;
-    int j = 0;
-    int  temp;
-    while (swapped  == 1) {
-        swapped = 0;
-        j++;
-        for (i = begin; i <= end - j; i++) {
-            if (list[i] > list[i+1]) {
-                temp = list[i];
-                list[i] = list[i+1];
-                list[i+1] = temp;
-                swapped = 1;
-                }
-            }
-        }
-    pthread_exit (0);
 }
 /** Merge  thread** Uses  simple  merge  sort  for  merging  two  sublists*/
 void *merger(void *params){
