@@ -7,8 +7,8 @@
 #define HUNGRYSTATE 1 
 #define THINKSTATE 2 
 #define EATINGSTATE 0 
-#define RIGHTFORK (phnum + 1) % NUMPHILO
-#define LEFTFORK (phnum + 4) % NUMPHILO
+#define RIGHTFORK (philo + 1) % NUMPHILO
+#define LEFTFORK (philo + 4) % NUMPHILO
 
   
 int state[NUMPHILO]; 
@@ -16,50 +16,50 @@ int phil[NUMPHILO] = { 0, 1, 2, 3, 4 };
 sem_t mutex; 
 sem_t S[NUMPHILO]; 
   
-void neighbours(int phnum) 
+void neighbours(int philo) 
 { 
-    if (state[phnum] == HUNGRYSTATE && state[LEFTFORK] != EATINGSTATE && state[RIGHTFORK] != EATINGSTATE) { 
+    if (state[philo] == HUNGRYSTATE && state[LEFTFORK] != EATINGSTATE && state[RIGHTFORK] != EATINGSTATE) { 
 
-        state[phnum] = EATINGSTATE; 
+        state[philo] = EATINGSTATE; 
   
         sleep(2); 
   
         printf("Philosopher %d takes fork %d and %d\n", 
-                      phnum + 1, LEFTFORK + 1, phnum + 1); 
+                      philo + 1, LEFTFORK + 1, philo + 1); 
   
-        printf("Philosopher %d is currently eating\n", phnum + 1); 
+        printf("Philosopher %d is currently eating\n", philo + 1); 
   
-        sem_post(&S[phnum]); 
+        sem_post(&S[philo]); 
     } 
 } 
   
-void pickup_forks(int phnum) 
+void pickup_forks(int philo) 
 { 
     sem_wait(&mutex); 
   
-    state[phnum] = HUNGRYSTATE; 
+    state[philo] = HUNGRYSTATE; 
   
-    printf("Philosopher %d is currently hungry\n", phnum + 1); 
+    printf("Philosopher %d is currently hungry\n", philo + 1); 
   
-    neighbours(phnum); 
+    neighbours(philo); 
   
     sem_post(&mutex); 
   
-    sem_wait(&S[phnum]); 
+    sem_wait(&S[philo]); 
   
     sleep(1); 
 } 
   
-void return_forks(int phnum) 
+void return_forks(int philo) 
 { 
   
     sem_wait(&mutex); 
   
-    state[phnum] = THINKSTATE; 
+    state[philo] = THINKSTATE; 
   
     printf("Philosopher %d putting fork %d and %d down\n", 
-           phnum + 1, LEFTFORK + 1, phnum + 1); 
-    printf("Philosopher %d is currently thinking\n", phnum + 1); 
+           philo + 1, LEFTFORK + 1, philo + 1); 
+    printf("Philosopher %d is currently thinking\n", philo + 1); 
   
     neighbours(LEFTFORK); 
     neighbours(RIGHTFORK); 
