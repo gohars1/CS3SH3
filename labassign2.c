@@ -4,9 +4,7 @@
 #include <limits.h>
 #include <math.h>
 
-
 #define  NUMBER_OF_THREADS          1
-
 
 void *primenumbercalculator(void *params);
 int isprime();
@@ -27,10 +25,7 @@ int  main (int argc , const  char * argv[]){
 
     pthread_create (& workers[0], 0, primenumbercalculator , NULL);
 
-
-
     pthread_join(workers[0], NULL);
-
     
 }
 
