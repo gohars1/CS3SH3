@@ -1,9 +1,3 @@
-/**
- * Implementation of various scheduling algorithms.
- *
- * Round-robin scheduling
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -13,9 +7,6 @@
 #include "cpu.h"
 
 struct node *head = NULL;
-
-// pointer to the struct containing the next task
-struct node *tmp;
 
 Task *pickNextTask();
 
@@ -39,25 +30,12 @@ void schedule()
 {
     Task *current;
 
-    tmp = head;
-
     while (head != NULL) {
         current = pickNextTask();
 
-        if (current->burst > QUANTUM) {
-            run(current, QUANTUM);
+        run(current,current->burst);
 
-            current->burst -= QUANTUM;
-        }
-        else {
-            run(current, current->burst);
-            
-            current->burst = 0;
-
-            printf("Task %s finished.\n",current->name);        
-            delete(&head, current);
-        }
-
+        delete(&head, current);
     }
 }
 
@@ -66,12 +44,16 @@ void schedule()
  */
 Task *pickNextTask()
 {
-    Task *nextTask = tmp->task;
+struct node *temp;
+Task *hp = head->task;
+temp = head->next;
 
-    if (tmp->next == NULL)
-        tmp = head;
-    else
-        tmp = tmp->next;
+    while (temp != NULL) {
+        if (temp->task->burst < hp->burst)
+            hp = temp->task;
 
-    return nextTask;
+        temp = temp->next;
+    }
+
+    return hp;
 }
