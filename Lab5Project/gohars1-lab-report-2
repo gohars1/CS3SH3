@@ -1,0 +1,22 @@
+time-shm.c
+
+For time-shm.c I used a shared memory object to calculate the time for
+a c program to take a command line input. Before running the command
+I save the time to a shared memory object and then run the command. When
+the command is done running, I subtract the current time with the time I
+saved in the shared memory object. With that number I print the elapsed time
+for which it took to run the command.
+
+time-pipe.c
+
+For time-pipe.c the goal is also to calculate the time for a c program to
+take a command line input. However, in this case instead of using shared memory
+I use a pipe. Before running the command I create a child process using fork, and
+from there we save the start time to a pipe. The parent process will then read the
+start time from the pipe and subtract it from the current time. The value is then
+printed afterwards.
+
+The advantage of shared memory over using a pipe is that it is faster. Although,
+shared memory is faster it is less reliable because there is more
+chance of data mix up while pipe is more reliable since the data buffer 
+is under control of the kernel.
